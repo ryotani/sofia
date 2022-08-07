@@ -25,6 +25,7 @@ R3BSofFragmentAnalysis::R3BSofFragmentAnalysis()
     , fMwpc2HitDataCA(NULL)
     , fMwpc3HitDataCA(NULL)
     , fTofWHitDataCA(NULL)
+    , fMusicHitDataCA(NULL)
     , fTwimHitDataCA(NULL)
     , fTrackingDataCA(NULL)
     , fOnline(kFALSE)
@@ -47,6 +48,7 @@ R3BSofFragmentAnalysis::R3BSofFragmentAnalysis(const TString& name, Int_t iVerbo
     , fMwpc2HitDataCA(NULL)
     , fMwpc3HitDataCA(NULL)
     , fTofWHitDataCA(NULL)
+    , fMusicHitDataCA(NULL)
     , fTwimHitDataCA(NULL)
     , fTrackingDataCA(NULL)
     , fOnline(kFALSE)
@@ -77,6 +79,10 @@ R3BSofFragmentAnalysis::~R3BSofFragmentAnalysis()
     {
         delete fTofWHitDataCA;
     }
+    if (fMusicHitDataCA)
+    {
+        delete fMusicHitDataCA;
+    }
     if (fTwimHitDataCA)
     {
         delete fTwimHitDataCA;
@@ -92,24 +98,28 @@ void R3BSofFragmentAnalysis::SetParContainers()
     // Parameter Container
     // Reading softrackingAnaPar from FairRuntimeDb
     FairRuntimeDb* rtdb = FairRuntimeDb::instance();
-    if (!rtdb)
-    {
-        R3BLOG(ERROR, "FairRuntimeDb not opened!");
-    }
+    R3BLOG_IF(ERROR, !rtdb, "FairRuntimeDb not opened!");
     //
     fFragPar = (R3BSofFragmentAnaPar*)rtdb->getContainer("soffragmentAnaPar");
-    if (!fFragPar)
-    {
-        R3BLOG(ERROR, "R3BSofFragmentAnaPar::Init() Couldn't get handle on soffragmentAnaPar container");
-    }
+    R3BLOG_IF(ERROR, !fFragPar, "R3BSofFragmentAnaPar::Init() Couldn't get handle on soffragmentAnaPar container");
     // fFragPar->printParams();
     //
     // Getting Twim Parameters
     fTwimPar = (R3BTwimHitPar*)rtdb->getContainer("twimHitPar");
-    if (!fTwimPar)
-    {
-        R3BLOG(ERROR, "Couldn't get handle on twimHitPar container");
-    }
+    R3BLOG_IF(ERROR, !fTwimPar, "Couldn't get handle on twimHitPar container");
+    //
+    // Geometries
+    fMw0GeoPar = (R3BTGeoPar*)rtdb->getContainer("Mwpc0GeoPar");
+    R3BLOG_IF(ERROR, !fMw0GeoPar, "Could not get access to Mwpc0GeoPar container.");
+
+    fMw1GeoPar = (R3BTGeoPar*)rtdb->getContainer("Mwpc1GeoPar");
+    R3BLOG_IF(ERROR, !fMw1GeoPar, "Could not get access to Mwpc1GeoPar container.");
+
+    fMw2GeoPar = (R3BTGeoPar*)rtdb->getContainer("Mwpc2GeoPar");
+    R3BLOG_IF(ERROR, !fMw2GeoPar, "Could not get access to Mwpc2GeoPar container.");
+
+    fRoluGeoPar = (R3BTGeoPar*)rtdb->getContainer("RoluGeoPar");
+    R3BLOG_IF(ERROR, !fRoluGeoPar, "Could not get access to RoluGeoPar container.");
 }
 
 void R3BSofFragmentAnalysis::SetParameter()
@@ -187,6 +197,12 @@ InitStatus R3BSofFragmentAnalysis::Init()
         return kFATAL;
     }
 
+    fMusicHitDataCA = (TClonesArray*)rootManager->GetObject("MusicHitData");
+    if (!fMusicHitDataCA)
+    {
+        return kFATAL;
+    }
+
     fTwimHitDataCA = (TClonesArray*)rootManager->GetObject("TwimHitData");
     if (!fTwimHitDataCA)
     {
@@ -201,14 +217,13 @@ InitStatus R3BSofFragmentAnalysis::Init()
 
     // OUTPUT DATA
     fTrackingDataCA = new TClonesArray("R3BSofTrackingData", 2);
-    if (!fOnline)
-    {
-        rootManager->Register("SofTrackingData", "GLAD Tracking Analysis", fTrackingDataCA, kTRUE);
-    }
-    else
-    {
-        rootManager->Register("SofTrackingData", "GLAD Tracking Analysis", fTrackingDataCA, kFALSE);
-    }
+    rootManager->Register("SofTrackingData", "GLAD Tracking Analysis", fTrackingDataCA, !fOnline);
+
+    // ROLU position stored as MWPC class
+    fRoluPosDataCA = new TClonesArray("R3BMwpcHitData", 2);
+    rootManager->Register("RoluPosData", "ROLU position", fRoluPosDataCA, !fOnline);
+
+    //
     ReInit();
     SetParameter();
     return kSUCCESS;
@@ -227,7 +242,7 @@ void R3BSofFragmentAnalysis::Exec(Option_t* option)
     // Reset entries in output arrays, local arrays
     Double_t fZ = NAN, fE = NAN, fAq = NAN;
     Double_t Beta = NAN, Brho_Cave = NAN, Length = NAN;
-    Double_t ToF_Cave = NAN, TwimTheta = NAN;
+    Double_t ToF_Cave = NAN, MusicTheta = NAN, TwimTheta = NAN;
     Double_t mw[4][4] = { { NAN } }; // mwpc[ID:0-4][x,y,a,b]
     Int_t Paddle = 0;
 
@@ -236,28 +251,37 @@ void R3BSofFragmentAnalysis::Exec(Option_t* option)
     Int_t nHitMwpc2 = fMwpc2HitDataCA->GetEntries();
     Int_t nHitMwpc3 = fMwpc3HitDataCA->GetEntries();
     Int_t nHitTofW = fTofWHitDataCA->GetEntries();
+    Int_t nHitMusic = fMusicHitDataCA->GetEntries();
     Int_t nHitTwim = fTwimHitDataCA->GetEntries();
     HitTofW = new R3BSofTofWHitData*[nHitTofW];
+    HitMusic = new R3BMusicHitData*[nHitMusic];
     HitTwim = new R3BTwimHitData*[nHitTwim];
     HitMwpc0 = new R3BMwpcHitData*[nHitMwpc0];
     HitMwpc1 = new R3BMwpcHitData*[nHitMwpc1];
     HitMwpc2 = new R3BMwpcHitData*[nHitMwpc2];
     HitMwpc3 = new R3BMwpcHitData*[nHitMwpc3];
 
-    if (nHitMwpc1 < 1 || nHitMwpc2 < 1 || nHitMwpc3 < 1 || nHitTofW < 1 || nHitTwim < 1)
+    if (nHitMwpc0 < 1 || nHitMwpc1 < 1 || nHitMwpc2 < 1 || nHitMwpc3 < 1 || nHitTofW < 1 || nHitMusic < 1 ||
+        nHitTwim < 1)
         return;
 
+    for (Int_t i = 0; i < nHitMwpc0; i++)
+    {
+        HitMwpc0[i] = (R3BMwpcHitData*)(fMwpc0HitDataCA->At(i));
+        mw[0][0] = HitMwpc0[i]->GetX() + fMw0GeoPar->GetPosX() * 10.; // mm
+        mw[0][1] = HitMwpc0[i]->GetY() + fMw0GeoPar->GetPosY() * 10.; // mm
+    }
     for (Int_t i = 0; i < nHitMwpc1; i++)
     {
         HitMwpc1[i] = (R3BMwpcHitData*)(fMwpc1HitDataCA->At(i));
-        mw[1][0] = HitMwpc1[i]->GetX();
-        mw[1][1] = HitMwpc1[i]->GetY();
+        mw[1][0] = HitMwpc1[i]->GetX() + fMw1GeoPar->GetPosX() * 10.; // mm
+        mw[1][1] = HitMwpc1[i]->GetY() + fMw1GeoPar->GetPosY() * 10.; // mm
     }
     for (Int_t i = 0; i < nHitMwpc2; i++)
     {
         HitMwpc2[i] = (R3BMwpcHitData*)(fMwpc2HitDataCA->At(i));
-        mw[2][0] = HitMwpc2[i]->GetX();
-        mw[2][1] = HitMwpc2[i]->GetY();
+        mw[2][0] = HitMwpc2[i]->GetX() + fMw2GeoPar->GetPosX() * 10.; // mm
+        mw[2][1] = HitMwpc2[i]->GetY() + fMw2GeoPar->GetPosY() * 10.; // mm
     }
     // Calculate raw angle /mm
     // mw[1][2] = mw[2][0] - mw[1][0];
@@ -288,6 +312,26 @@ void R3BSofFragmentAnalysis::Exec(Option_t* option)
 
     double gamma = 1. / sqrt(1. - Beta * Beta);
 
+    // Getting Music angle
+    for (Int_t ihit = 0; ihit < nHitMusic; ihit++)
+    {
+        HitMusic[ihit] = (R3BMusicHitData*)fMusicHitDataCA->At(ihit);
+        if (!HitMusic[ihit])
+            continue;
+        // In case the MusicHitData container has several "realistic" values,
+        // it's not possible to distinguish which is the "correct" event. Thus skipping events having several hits.
+        if (TMath::Abs(MusicTheta) < 0.1)
+            return;
+        MusicTheta = HitMusic[ihit]->GetTheta();
+    }
+    //
+    // Calculate estimated ROLU position
+    Double_t rolux = mw[0][0] + MusicTheta * (fRoluGeoPar->GetPosZ() - fMw0GeoPar->GetPosZ()) * 10.; // mm
+    Double_t roluy = mw[0][1] +
+                     (mw[1][1] - mw[0][1]) / (fMw1GeoPar->GetPosZ() - fMw0GeoPar->GetPosZ()) *
+                         (fRoluGeoPar->GetPosZ() - fMw0GeoPar->GetPosZ());
+    AddRoluPos(rolux, roluy);
+    //
     // Z from twim-music ------------------------------------
     Double_t countz = 0;
     for (Int_t i = 0; i < nHitTwim; i++)
@@ -298,12 +342,9 @@ void R3BSofFragmentAnalysis::Exec(Option_t* option)
             fE = HitTwim[i]->GetEave();
             TwimTheta = HitTwim[i]->GetTheta();
             countz++;
+            fZ = fTwimZ0 + fTwimZ1 * TMath::Sqrt(fE) * Beta + fTwimZ2 * fE * Beta * Beta;
+            HitTwim[i]->SetZcharge(fZ); // Upate Z
         }
-    }
-    if (countz > 0)
-    {
-        // fE = fE / countz;
-        fZ = fTwimZ0 + fTwimZ1 * TMath::Sqrt(fE) * Beta + fTwimZ2 * fE * Beta * Beta;
     }
     //
     // Calculate brho and aoq
@@ -341,11 +382,15 @@ void R3BSofFragmentAnalysis::Reset()
         delete HitMwpc2;
     if (HitMwpc3)
         delete HitMwpc3;
+    if (HitMusic)
+        delete HitMusic;
     if (HitTwim)
         delete HitTwim;
 
     if (fTrackingDataCA)
         fTrackingDataCA->Clear();
+    if (fRoluPosDataCA)
+        fRoluPosDataCA->Clear();
 }
 
 // -----   Private method AddData  --------------------------------------------
@@ -360,4 +405,12 @@ R3BSofTrackingData* R3BSofFragmentAnalysis::AddData(Double_t z,
     TClonesArray& clref = *fTrackingDataCA;
     Int_t size = clref.GetEntriesFast();
     return new (clref[size]) R3BSofTrackingData(z, aq, beta, length, brho, paddle);
+}
+
+R3BMwpcHitData* R3BSofFragmentAnalysis::AddRoluPos(Double_t x, Double_t y)
+{
+    // It fills the R3BMwpcHitData
+    TClonesArray& clref = *fRoluPosDataCA;
+    Int_t size = clref.GetEntriesFast();
+    return new (clref[size]) R3BMwpcHitData(x, y);
 }

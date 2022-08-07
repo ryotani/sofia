@@ -69,8 +69,9 @@ class R3BSofFrsAnalysis : public FairTask
     /** Virtual method Finish **/
     virtual void Finish();
 
-    /** Accessor to select online mode **/
+    /** Accessor to select options **/
     void SetOnline(Bool_t option) { fOnline = option; }
+    void SetBetaCorr(Bool_t option) { fBetaCorr = option; }
 
     /** Accessor functions **/
     void SetNbSci(UChar_t ndets) {fNbSci = ndets;}
@@ -93,6 +94,7 @@ class R3BSofFrsAnalysis : public FairTask
     R3BSofFrsAnaPar* fFrs_Par; // Parameter container
     R3BMusicHitPar* fCal_Par; /// Parameter container
     Bool_t fOnline; // Don't store data for online    UChar_t fNbSci;
+    Bool_t fBetaCorr; // Option to gate on beta correlation between s2-cave and s8-cave to avoid s2 pileup
     UChar_t fNbTof;
     UChar_t fNbSci;
     UChar_t fIdS2;
@@ -121,7 +123,7 @@ class R3BSofFrsAnalysis : public FairTask
     
     /** Private method FrsData **/
     //** Adds a FrsData to the analysis
-    R3BFrsData* AddData(Int_t StaId, Int_t StoId, Double_t z, Double_t aq, Double_t betaval, Double_t brhoval, Double_t xs2, Double_t xc);
+    R3BFrsData* AddData(Int_t StaId, Int_t StoId, Double_t z = NAN, Double_t aq = NAN, Double_t betaval = NAN, Double_t brhoval = NAN, Double_t xs2 = NAN, Double_t xc = NAN);
 
   public:
     // Class definition

@@ -36,6 +36,11 @@ void R3BSofAnaContFact::setAllContainers()
     p2->addContext("SofFragmentParContext");
 
     containers->Add(p2);
+
+    FairContainer* p3 = new FairContainer("RoluGeoPar", "Rolu geometry parameters", "GeometryParameterContext");
+    p3->addContext("GeometryParameterContext");
+
+    containers->Add(p3);
 }
 
 FairParSet* R3BSofAnaContFact::createContainer(FairContainer* c)
@@ -55,6 +60,11 @@ FairParSet* R3BSofAnaContFact::createContainer(FairContainer* c)
     if (strcmp(name, "soffragmentAnaPar") == 0)
     {
         p = new R3BSofFragmentAnaPar(c->getConcatName().Data(), c->GetTitle(), c->getContext());
+    }
+
+    if (strcmp(name, "RoluGeoPar") == 0)
+    {
+        p = new R3BTGeoPar(c->getConcatName().Data(), c->GetTitle(), c->getContext());
     }
 
     return p;

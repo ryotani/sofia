@@ -31,6 +31,8 @@
 #include "R3BMwpcHitData.h"
 #include "R3BSofTofWHitData.h"
 #include "R3BSofTrackingData.h"
+#include "R3BTGeoPar.h"
+#include "R3BMusicHitData.h"
 #include "R3BTwimHitData.h"
 #include "R3BTwimHitPar.h"
 #include "R3BSofFragmentAnaPar.h"
@@ -103,20 +105,29 @@ class R3BSofFragmentAnalysis : public FairTask
     TClonesArray* fMwpc1HitDataCA;  /**< Array with Mwpc Hit-input data. >*/
     TClonesArray* fMwpc2HitDataCA;  /**< Array with Mwpc Hit-input data. >*/
     TClonesArray* fMwpc3HitDataCA;  /**< Array with Mwpc Hit-input data. >*/
+    TClonesArray* fMusicHitDataCA;  /**< Array with R3BMusic Hit-input data. >*/
     TClonesArray* fTwimHitDataCA;  /**< Array with Twim Hit-input data. >*/
     TClonesArray* fTofWHitDataCA;  /**< Array with ToF Hit-input data. >*/
     TClonesArray* fTrackingDataCA; /**< Array with Tracking-output data. >*/
+    TClonesArray* fRoluPosDataCA; /**< Array with reconstructed ROLU positions. >*/
 
     R3BSofTofWHitData** HitTofW;
+    R3BMusicHitData** HitMusic;
     R3BTwimHitData** HitTwim;
     R3BMwpcHitData** HitMwpc0;
     R3BMwpcHitData** HitMwpc1;
     R3BMwpcHitData** HitMwpc2;
     R3BMwpcHitData** HitMwpc3;
 
+    R3BTGeoPar* fMw0GeoPar;
+    R3BTGeoPar* fMw1GeoPar;
+    R3BTGeoPar* fMw2GeoPar;
+    R3BTGeoPar* fRoluGeoPar;
+
     /** Private method TrackingData **/
     //** Adds a TrackingData to the analysis
     R3BSofTrackingData* AddData(Double_t z, Double_t aq, Double_t beta, Double_t length, Double_t brho, Int_t paddle);
+    R3BMwpcHitData* AddRoluPos(Double_t x, Double_t y);
 
   public:
     // Class definition
