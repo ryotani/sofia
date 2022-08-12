@@ -203,7 +203,7 @@ InitStatus R3BSofFrsAnalysis::Init()
     {
         rootManager->Register("FrsData", "Analysis FRS", fFrsDataCA, kFALSE);
     }
-    ReInit();
+    // ReInit();
     SetParameter();
 
     xpos = new Double_t[fNbSci];
@@ -216,6 +216,7 @@ InitStatus R3BSofFrsAnalysis::Init()
 InitStatus R3BSofFrsAnalysis::ReInit()
 {
     SetParContainers();
+    SetParameter();
     return kSUCCESS;
 }
 
@@ -392,3 +393,5 @@ R3BFrsData* R3BSofFrsAnalysis::AddData(Int_t StaId,
     Int_t size = clref.GetEntriesFast();
     return new (clref[size]) R3BFrsData(StaId, StoId, z, aq, beta, brho, xs2, xc);
 }
+
+ClassImp(R3BSofFrsAnalysis);

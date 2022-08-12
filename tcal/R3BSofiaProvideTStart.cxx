@@ -11,15 +11,41 @@
  * or submit itself to any jurisdiction.                                      *
  ******************************************************************************/
 
-#include "R3BSofiaProvideTStart.h"
+#include "R3BLogger.h"
 #include "FairRootManager.h"
+#include "FairRuntimeDb.h"
+
 #include "R3BEventHeader.h"
+#include "R3BSofSciRawTofPar.h"
+#include "R3BSofiaProvideTStart.h"
 
 R3BSofiaProvideTStart::R3BSofiaProvideTStart()
     : FairTask("R3BSofiaProvideTStart", 0)
     , fSofSciCalData("SofSciTcalData")
+    , fRawTofPar(NULL)
+    , fStartId(1)
     , fEventHeader(nullptr)
 {
+}
+
+void R3BSofiaProvideTStart::SetParContainers()
+{
+    fRawTofPar = (R3BSofSciRawTofPar*)FairRuntimeDb::instance()->getContainer("SofSciRawTofPar");
+    if (!fRawTofPar)
+    {
+        R3BLOG(ERROR, "SofSciRawTofPar-Container not found.");
+        return;
+    }
+}
+
+void R3BSofiaProvideTStart::SetParameter()
+{
+    if (!fRawTofPar)
+      {
+        R3BLOG(FATAL, "fRawTofPar not found.");
+      }
+    fStartId = fRawTofPar->GetDetIdCaveC();
+    return;
 }
 
 InitStatus R3BSofiaProvideTStart::Init()
@@ -32,11 +58,22 @@ InitStatus R3BSofiaProvideTStart::Init()
         throw std::runtime_error("R3BSofiaProvideTStart: No FairRootManager");
     }
 
-    fEventHeader = (R3BEventHeader*)ioman->GetObject("R3BEventHeader");
+
+    fEventHeader = (R3BEventHeader*)ioman->GetObject("EventHeader.");
     if (fEventHeader == nullptr)
     {
-        throw std::runtime_error("R3BSofiaProvideTStart: No R3BEventHeader");
+        fEventHeader = (R3BEventHeader*)ioman->GetObject("R3BEventHeader");
+        R3BLOG(WARNING, "R3BEventHeader was found instead of EventHeader.");
     }
+    SetParameter();
+
+    return kSUCCESS;
+}
+
+InitStatus R3BSofiaProvideTStart::ReInit()
+{
+    SetParContainers();
+    SetParameter();
     return kSUCCESS;
 }
 
@@ -52,15 +89,15 @@ Double_t R3BSofiaProvideTStart::GetTStart() const
     }
 
     Double_t ts = 0.;
-    int ns = 0;
+    Int_t ns = 0;
     for (const auto& sof : sofsci)
     {
-        if (sof->GetDetector() == 4)
+        if (sof->GetDetector() == fStartId)
         {
             if (sof->GetPmt() == 1 || sof->GetPmt() == 2)
             {
                 ts = ts + sof->GetRawTimeNs();
-                ns = ns + 1;
+                ns++;
             }
         }
     }
@@ -77,4 +114,4 @@ Double_t R3BSofiaProvideTStart::GetTStart() const
 
 bool R3BSofiaProvideTStart::IsBeam() const { return !std::isnan(GetTStart()); }
 
-ClassImp(R3BSofiaProvideTStart)
+ClassImp(R3BSofiaProvideTStart);

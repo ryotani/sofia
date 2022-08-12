@@ -7,24 +7,23 @@
 #ifndef R3BSofFragmentAnalysis_H
 #define R3BSofFragmentAnalysis_H
 
-
 // ROOT headers
+#include "TArrayF.h"
 #include "TClonesArray.h"
+#include "TF1.h"
+#include "TH1F.h"
 #include "TMath.h"
 #include "TRandom.h"
 #include "TVector3.h"
-#include "TF1.h"
-#include "TH1F.h"
-#include "TArrayF.h"
 #include <TRandom.h>
 #include <iomanip>
 
 // Fair headers
-#include "FairTask.h"
 #include "FairLogger.h"
 #include "FairRootManager.h"
 #include "FairRunAna.h"
 #include "FairRuntimeDb.h"
+#include "FairTask.h"
 
 // SOFIA headers
 #include "R3BLogger.h"
@@ -36,8 +35,10 @@
 #include "R3BTwimHitData.h"
 #include "R3BTwimHitPar.h"
 #include "R3BSofFragmentAnaPar.h"
+#include "R3BTwimHitPar.h"
 
 class TClonesArray;
+class R3BSofTrackingData;
 
 class R3BSofFragmentAnalysis : public FairTask
 {
@@ -63,7 +64,7 @@ class R3BSofFragmentAnalysis : public FairTask
      * Is called by the framework for each event after executing
      * the tasks.
      */
-    virtual void FinishEvent() {Reset();}
+    virtual void FinishEvent() { Reset(); }
 
     virtual void SetParContainers();
 
@@ -90,22 +91,21 @@ class R3BSofFragmentAnalysis : public FairTask
 
     // Parameters set with accessor functions
     Double_t frho_Cave, fBfield_Glad, fTimeOffset, fTofWPos;
-    Bool_t fOnline; // Don't store data for online    
+    Bool_t fOnline; // Don't store data for online
     R3BSofFragmentAnaPar* fFragPar;
     R3BTwimHitPar* fTwimPar;
-    
+
     // Parameters from par file
     Float_t fTwimZ0 = 0., fTwimZ1 = 0., fTwimZ2 = 0.; // CalibPar for Twim
-    Double_t fOffsetAq, fOffsetZ; // Offsets in A/q and Z
+    Double_t fOffsetAq, fOffsetZ;                     // Offsets in A/q and Z
     // Double_t fDist_mw3_tof;
     // Double_t fDist_start_glad;
     
-    
-    TClonesArray* fMwpc0HitDataCA;  /**< Array with Mwpc Hit-input data. >*/
-    TClonesArray* fMwpc1HitDataCA;  /**< Array with Mwpc Hit-input data. >*/
-    TClonesArray* fMwpc2HitDataCA;  /**< Array with Mwpc Hit-input data. >*/
-    TClonesArray* fMwpc3HitDataCA;  /**< Array with Mwpc Hit-input data. >*/
-    TClonesArray* fMusicHitDataCA;  /**< Array with R3BMusic Hit-input data. >*/
+    TClonesArray* fMwpc0HitDataCA; /**< Array with Mwpc Hit-input data. >*/
+    TClonesArray* fMwpc1HitDataCA; /**< Array with Mwpc Hit-input data. >*/
+    TClonesArray* fMwpc2HitDataCA; /**< Array with Mwpc Hit-input data. >*/
+    TClonesArray* fMwpc3HitDataCA; /**< Array with Mwpc Hit-input data. >*/
+    TClonesArray* fMusicHitDataCA; /**< Array with R3BMusic Hit-input data. >*/
     TClonesArray* fTwimHitDataCA;  /**< Array with Twim Hit-input data. >*/
     TClonesArray* fTofWHitDataCA;  /**< Array with ToF Hit-input data. >*/
     TClonesArray* fTrackingDataCA; /**< Array with Tracking-output data. >*/

@@ -144,3 +144,5 @@ void R3BSofFrsAnaPar::printParams()
 	LOG(INFO) << "BrhoCorrPar(" << i << "): " << fBrhoCorrPar->GetAt(i);
       }
 }
+
+ClassImp(R3BSofFrsAnaPar);

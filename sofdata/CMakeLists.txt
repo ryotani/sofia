@@ -32,7 +32,7 @@ trimData/R3BSofTrimHitData.cxx
 atData/R3BSofATPoint.cxx
 atData/R3BSofAtMappedData.cxx
 tofwData/R3BSofTofWPoint.cxx
-#sciData/R3BSofSciPoint.cxx
+sciData/R3BSofSciPoint.cxx
 sciData/R3BSofSciMappedData.cxx
 sciData/R3BSofSciTcalData.cxx
 sciData/R3BSofSciSingleTcalData.cxx

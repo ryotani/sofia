@@ -6,14 +6,14 @@
 #ifndef R3BSofFragmentAnaPar_H
 #define R3BSofFragmentAnaPar_H
 
-#include "TString.h"
 #include "TArrayF.h"
 #include "TArrayI.h"
 #include "TObject.h"
+#include "TString.h"
 #include <iostream>
 
-#include "FairParGenericSet.h"
 #include "FairLogger.h"
+#include "FairParGenericSet.h"
 #include "FairParamList.h"
 
 class FairParamList;
@@ -23,8 +23,8 @@ class R3BSofFragmentAnaPar : public FairParGenericSet
   public:
     /** Standard constructor **/
     R3BSofFragmentAnaPar(const TString& name = "soffragmentAnaPar",
-                    const TString& title = "Fragment in Cave-C Parameters",
-                    const TString& context = "SofFagmentParContext");
+                         const TString& title = "Fragment in Cave-C Parameters",
+                         const TString& context = "SofFagmentParContext");
 
     /** Destructor **/
     virtual ~R3BSofFragmentAnaPar();
@@ -61,7 +61,7 @@ class R3BSofFragmentAnaPar : public FairParGenericSet
   private:
     Int_t fNumSci;
     Int_t fNumBrhoParam;
-    TArrayI* fIn_use;  // 1: in use, 0:otherwise
+    TArrayI* fIn_use; // 1: in use, 0:otherwise
     TArrayF* fTofW_Offset;
     TArrayF* fEffective_Length;
     TArrayF* fBrhoParameter;

@@ -17,21 +17,21 @@ using std::endl;
 // ---- Standard Constructor ---------------------------------------------------
 R3BSofSciRawPosPar::R3BSofSciRawPosPar(const char* name, const char* title, const char* context)
     : FairParGenericSet(name, title, context)
-    , fNumDets(4)
+    , fNumDets(1)
     , fNumPmts(3)
-    , fNumSignals(4)
-    , fNumParsPerSignal(2)
+    , fNumSignals(2)
+    , fNumParsPerSignal(1)
 {
-    fAllSignalsRawPosParams = new TArrayF(fNumSignals * fNumParsPerSignal);
+    fAllRawPosParams = new TArrayF(fNumSignals*fNumParsPerSignal);
 }
 
 // ----  Destructor ------------------------------------------------------------
 R3BSofSciRawPosPar::~R3BSofSciRawPosPar()
 {
     clear();
-    if (fAllSignalsRawPosParams)
+    if (fAllRawPosParams)
     {
-        delete fAllSignalsRawPosParams;
+        delete fAllRawPosParams;
     }
 }
 
@@ -54,9 +54,9 @@ void R3BSofSciRawPosPar::putParams(FairParamList* list)
     Int_t array_size = fNumSignals * fNumParsPerSignal;
     LOG(INFO) << "Array Size: " << array_size;
 
-    fAllSignalsRawPosParams->Set(array_size);
+    fAllRawPosParams->Set(array_size);
 
-    list->add("RawPosPar", *fAllSignalsRawPosParams);
+    list->add("RawPosPar", *fAllRawPosParams);
     list->add("nDetectorsRawPosPar", fNumDets);
     list->add("nChannelsRawPosPar", fNumPmts);
     list->add("nSignalsRawPosPar", fNumSignals);
@@ -90,11 +90,11 @@ Bool_t R3BSofSciRawPosPar::getParams(FairParamList* list)
 
     Int_t array_size = fNumSignals * fNumParsPerSignal;
     LOG(INFO) << "Array Size: " << array_size;
-    fAllSignalsRawPosParams->Set(array_size);
+    fAllRawPosParams->Set(array_size);
 
-    if (!(list->fill("RawPosPar", fAllSignalsRawPosParams)))
+    if (!(list->fill("RawPosPar", fAllRawPosParams)))
     {
-        LOG(INFO) << "---Could not initialize fAllSignalsRawPosParams";
+        LOG(INFO) << "---Could not initialize fAllRawPosParams";
         return kFALSE;
     }
 
@@ -112,6 +112,6 @@ void R3BSofSciRawPosPar::printParams()
     cout << "--- --------------------------------------------" << endl;
     for (Int_t param = 0; param < array_size; param++)
     {
-        cout << "LIMIT " << param << " = " << fAllSignalsRawPosParams->GetAt(param) << endl;
+        cout << "LIMIT " << param << " = " << fAllRawPosParams->GetAt(param) << endl;
     }
 }

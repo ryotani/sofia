@@ -5,3 +5,4 @@ core*
 *.txt
 *.swp
 macros/s467_*
+*.par

@@ -24,8 +24,7 @@ ${R3BROOT_SOURCE_DIR}/r3bdata/wrData
 ${R3BROOT_SOURCE_DIR}/r3bdata/trloiiData
 ${R3BROOT_SOURCE_DIR}/ssd/online
 ${R3BROOT_SOURCE_DIR}/califa/online
-#${R3BROOT_SOURCE_DIR}/trim
-#${R3BROOT_SOURCE_DIR}/twim/
+${R3BROOT_SOURCE_DIR}/trim
 ${R3BROOT_SOURCE_DIR}/twim/pars
 ${R3BROOT_SOURCE_DIR}/mwpc/mwpc0
 ${R3BROOT_SOURCE_DIR}/mwpc/mwpc1
@@ -35,7 +34,7 @@ ${R3BROOT_SOURCE_DIR}/tofw
 ${R3BROOT_SOURCE_DIR}/tracking
 ${R3BSOF_SOURCE_DIR}/sofdata
 ${R3BSOF_SOURCE_DIR}/sofdata/atData
-#${R3BSOF_SOURCE_DIR}/sofdata/trimData
+${R3BSOF_SOURCE_DIR}/sofdata/trimData
 ${R3BSOF_SOURCE_DIR}/sofdata/sciData
 ${R3BSOF_SOURCE_DIR}/sofdata/tofwData
 ${R3BSOF_SOURCE_DIR}/sofdata/trackingData
@@ -54,27 +53,27 @@ link_directories( ${LINK_DIRECTORIES})
 
 set(SRCS
 R3BSofOnlineSpectra.cxx
-#R3BSofStatusOnlineSpectra.cxx
+R3BSofStatusOnlineSpectra.cxx
 R3BSofMwpcvsMusicOnlineSpectra.cxx
 R3BSofAtOnlineSpectra.cxx
-#R3BSofTrimOnlineSpectra.cxx
-#R3BSofSciOnlineSpectra.cxx
-#R3BSofSciVsMusicOnlineSpectra.cxx
-#R3BSofSciVsTrimOnlineSpectra.cxx
-#R3BSofSciVsMwpc0OnlineSpectra.cxx
+R3BSofTrimOnlineSpectra.cxx
+R3BSofSciOnlineSpectra.cxx
+R3BSofSciVsMusicOnlineSpectra.cxx
+R3BSofSciVsTrimOnlineSpectra.cxx
+R3BSofSciVsMwpc0OnlineSpectra.cxx
 R3BSofTofWOnlineSpectra.cxx
 R3BSofFrsOnlineSpectra.cxx
 R3BSofFrsFillTree.cxx
 R3BSofFrsFragmentTree.cxx
 R3BSofTwimvsMusicOnlineSpectra.cxx
-#R3BSofTwimvsTrimOnlineSpectra.cxx
-#R3BSofTrimVsTofwOnlineSpectra.cxx
-#R3BAmsCorrelationOnlineSpectra.cxx
+R3BSofTwimvsTrimOnlineSpectra.cxx
+R3BSofTrimVsTofwOnlineSpectra.cxx
+R3BAmsCorrelationOnlineSpectra.cxx
 R3BSofTrackingOnlineSpectra.cxx
-#R3BSofTrackingFissionOnlineSpectra.cxx
+R3BSofTrackingFissionOnlineSpectra.cxx
 R3BSofScalersOnlineSpectra.cxx
-#R3BSofCorrOnlineSpectra.cxx
-#R3BSofSciVsPspxOnlineSpectra.cxx
+R3BSofCorrOnlineSpectra.cxx
+R3BSofSciVsPspxOnlineSpectra.cxx
 )
 
 # fill list of header files from list of source files

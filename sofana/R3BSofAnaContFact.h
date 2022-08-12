@@ -7,12 +7,7 @@
 #include "FairParRootFileIo.h"
 #include "FairRuntimeDb.h"
 
-#include "R3BSofFrsAnaPar.h"
-#include "R3BSofFragmentAnaPar.h"
-#include "R3BTGeoPar.h"
-
 #include "TClass.h"
-
 
 class FairContainer;
 

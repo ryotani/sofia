@@ -7,7 +7,6 @@
 #include "R3BSofFragmentAnalysis.h"
 
 Double_t const c = 29.9792458;
-TVector3 v1;
 
 // R3BSofFragmentAnalysis: Default Constructor --------------------------
 R3BSofFragmentAnalysis::R3BSofFragmentAnalysis()
@@ -414,3 +413,4 @@ R3BMwpcHitData* R3BSofFragmentAnalysis::AddRoluPos(Double_t x, Double_t y)
     Int_t size = clref.GetEntriesFast();
     return new (clref[size]) R3BMwpcHitData(x, y);
 }
+ClassImp(R3BSofFragmentAnalysis);

@@ -7,12 +7,11 @@ Set(SYSTEM_INCLUDE_DIRECTORIES ${SYSTEM_INCLUDE_DIRECTORIES} ${BASE_INCLUDE_DIRE
 set(INCLUDE_DIRECTORIES
 #put here all directories where header files are located
 ${R3BROOT_SOURCE_DIR}/r3bbase
-${R3BROOT_SOURCE_DIR}/passive
 ${R3BROOT_SOURCE_DIR}/neuland/shared
-${R3BSOF_SOURCE_DIR}/sofdata
 ${R3BSOF_SOURCE_DIR}/sofdata/sciData
 ${R3BSOF_SOURCE_DIR}/sofdata/tofwData
 ${R3BSOF_SOURCE_DIR}/tcal
+${R3BSOF_SOURCE_DIR}/sci
 )
 
 include_directories( ${INCLUDE_DIRECTORIES})
@@ -23,12 +22,8 @@ set(LINK_DIRECTORIES ${ROOT_LIBRARY_DIR} ${FAIRROOT_LIBRARY_DIR} )
 link_directories( ${LINK_DIRECTORIES})
 
 set(SRCS
-R3BSofTcalPar.cxx
 R3BSofTcalContFact.cxx
-R3BSofSciMapped2TcalPar.cxx
-R3BSofSciMapped2Tcal.cxx
-R3BSofTofWMapped2TcalPar.cxx
-R3BSofTofWMapped2Tcal.cxx
+R3BSofTcalPar.cxx
 R3BSofiaProvideTStart.cxx
 )
 
@@ -39,12 +34,6 @@ CHANGE_FILE_EXTENSION(*.cxx *.h HEADERS "${SRCS}")
 Set(LINKDEF SofTcalLinkDef.h)
 Set(LIBRARY_NAME R3BSofTcal)
 Set(DEPENDENCIES
-    Base ParBase Core m)
-
-if(FAIRDB_FOUND)
-set(DEPENDENCIES
-    ${DEPENDENCIES} FairDB)
-endif(FAIRDB_FOUND)
+    R3BBase R3BData)
 
 GENERATE_LIBRARY()
-

@@ -16,7 +16,6 @@ R3BSofSciTcal2SingleTcal::R3BSofSciTcal2SingleTcal()
     , fRawPosPar(NULL)
     , fRawTofPar(NULL)
     , fSingleTcal(NULL)
-    , fNumSingleTcal(0)
     , fOnline(kFALSE)
     , fNevent(0)
 {
@@ -24,14 +23,11 @@ R3BSofSciTcal2SingleTcal::R3BSofSciTcal2SingleTcal()
 
 R3BSofSciTcal2SingleTcal::~R3BSofSciTcal2SingleTcal()
 {
+    LOG(INFO) << "R3BSofSciTcal2SingleTcal: Delete instance";
     if (fTcal)
-    {
         delete fTcal;
-    }
     if (fSingleTcal)
-    {
         delete fSingleTcal;
-    }
 }
 
 void R3BSofSciTcal2SingleTcal::SetParContainers()
@@ -43,9 +39,6 @@ void R3BSofSciTcal2SingleTcal::SetParContainers()
             << "R3BSofSciTcal2SingleTcal::SetParContainers() : Could not get access to SofSciRawPosPar-Container.";
         return;
     }
-    else
-        LOG(INFO) << "R3BSofSciTcal2SingleTcal::SetParContainers() : SofSciRawPosPar-Container found with "
-                  << fRawPosPar->GetNumSignals() << " signals";
 
     fRawTofPar = (R3BSofSciRawTofPar*)FairRuntimeDb::instance()->getContainer("SofSciRawTofPar");
     if (!fRawTofPar)
@@ -54,9 +47,6 @@ void R3BSofSciTcal2SingleTcal::SetParContainers()
             << "R3BSofSciTcal2SingleTcal::SetParContainers() : Could not get access to SofSciRawTofPar-Container.";
         return;
     }
-    else
-        LOG(INFO) << "R3BSofSciTcal2SingleTcal::SetParContainers() : SofSciRawTofPar-Container found with "
-                  << fRawTofPar->GetNumSignals() << " signals";
 }
 
 InitStatus R3BSofSciTcal2SingleTcal::Init()
@@ -91,14 +81,7 @@ InitStatus R3BSofSciTcal2SingleTcal::Init()
 
     // Register output array in tree
     fSingleTcal = new TClonesArray("R3BSofSciSingleTcalData", 5);
-    if (!fOnline)
-    {
-        rm->Register("SofSciSingleTcalData", "SofSci", fSingleTcal, kTRUE);
-    }
-    else
-    {
-        rm->Register("SofSciSingleTcalData", "SofSci", fSingleTcal, kFALSE);
-    }
+    rm->Register("SofSciSingleTcalData", "SofSci SingleTcal", fSingleTcal, !fOnline);
 
     LOG(INFO) << "R3BSofSciTcal2SingleTcal::SofSciSingleTcalData items created";
 
@@ -107,27 +90,17 @@ InitStatus R3BSofSciTcal2SingleTcal::Init()
     // --- -------------------------- --- //
     if (fRawPosPar->GetNumSignals() == 0)
     {
-        LOG(ERROR) << " There are no RawPosPar Tcal parameters for SofSci";
+        LOG(ERROR) << "R3BSofSciTcal2SingleTcal::There are no RawPosPar Tcal parameters for SofSci";
         return kFATAL;
     }
     else
     {
-        LOG(INFO) << "  R3BSofSciTcal2SingleTcal::Init() : fRawPosPar: fNumSignals=" << fRawPosPar->GetNumSignals();
-    }
-
-    if (fRawTofPar->GetNumDets() == 0)
-    { // ATTENTION IN CASE OF PRIMARY BEAM, fRawTofPar->GetNumSignals() could be == 0
-        LOG(ERROR) << " There are no SofSci detectors declared";
-        return kFATAL;
-    }
-    else
-    {
-        LOG(INFO) << "  R3BSofSciTcal2SingleTcal::Init() : fRawTofPar: fNumSignals=" << fRawTofPar->GetNumSignals();
+        LOG(INFO) << "R3BSofSciTcal2SingleTcal::Init() : fRawPosPar: fNumSignals=" << fRawPosPar->GetNumSignals();
     }
 
     if (fRawTofPar->GetDetIdCaveC() == 0)
     {
-        LOG(ERROR) << "id number of the cave C SofSci should be >0 (1-based)";
+        LOG(ERROR) << "R3BSofSciTcal2SingleTcal::Id number of the cave C SofSci should be >0 (1-based)";
         return kFATAL;
     }
 
@@ -145,25 +118,19 @@ InitStatus R3BSofSciTcal2SingleTcal::Init()
         return kFATAL;
     }
 
-    if (fRawTofPar->GetDetIdS2() == 0 && fRawTofPar->GetNumDets() > 1)
-    {
-        LOG(ERROR) << "Number of SofSci declared >1 (secondary beam), but idS2 = " << fRawTofPar->GetDetIdS2()
-                   << " but should be [1;" << fRawTofPar->GetNumDets() - 1 << "]";
-        return kFATAL;
-    }
-
     if (fRawPosPar->GetNumDets() > 1)
     {
         if (fRawPosPar->GetNumDets() != fRawTofPar->GetNumDets())
         {
             LOG(ERROR) << "Mismatch between the number of SofSci detectors in RawPosPar (" << fRawPosPar->GetNumDets()
-                       << ") and RawTofPar )" << fRawTofPar->GetNumDets() << ")";
+                       << ") and RawTofPar (" << fRawTofPar->GetNumDets() << ")";
             return kFATAL;
         }
 
         if (fRawPosPar->GetNumPmts() != fRawTofPar->GetNumChannels())
         {
-            LOG(ERROR) << "Mismatch between the number of SofSci channels in RawPosPar and RawTofPar";
+            LOG(ERROR) << "R3BSofSciTcal2SingleTcal::Mismatch between the number of SofSci channels in RawPosPar and "
+                          "RawTofPar";
             return kFATAL;
         }
     }
@@ -181,6 +148,9 @@ InitStatus R3BSofSciTcal2SingleTcal::ReInit()
 
 void R3BSofSciTcal2SingleTcal::Exec(Option_t* option)
 {
+
+    // initialize the output data
+    Reset();
 
     UShort_t nDets = fRawPosPar->GetNumDets();
     UShort_t nChs = fRawPosPar->GetNumPmts();
@@ -240,9 +210,9 @@ void R3BSofSciTcal2SingleTcal::Exec(Option_t* option)
                     // RawPos = TrawRIGHT - TrawLEFT corresponds to x increasing from RIGHT to LEFT
                     iRawPos = iTraw[0][multR] - iTraw[1][multL];
                     // if the raw position is outside the range: continue
-                    if (iRawPos < fRawPosPar->GetSignalTcalParams(0))
+                    if (iRawPos < fRawPosPar->GetParam(0))
                         continue;
-                    if (iRawPos > fRawPosPar->GetSignalTcalParams(1))
+                    if (iRawPos > fRawPosPar->GetParam(1))
                         continue;
                     // if the left or right hit has already been used, continue
                     if ((((maskR[0] >> multR) & (0x1)) == 1) || (((maskL[0] > multL) & (0x1)) == 1))
@@ -285,8 +255,8 @@ void R3BSofSciTcal2SingleTcal::Exec(Option_t* option)
                     {
                         // check the position in the stop detector
                         iRawPos = (iTraw[dSto * nChs][multRsto] - iTraw[dSto * nChs + 1][multLsto]);
-                        if ((iRawPos < fRawPosPar->GetSignalTcalParams(2 * dSto)) ||
-                            (iRawPos > fRawPosPar->GetSignalTcalParams(2 * dSto + 1)))
+                        if ((iRawPos < fRawPosPar->GetParam(2 * dSto)) ||
+                            (iRawPos > fRawPosPar->GetParam(2 * dSto + 1)))
                             continue;
                         for (UShort_t multRsta = 0; multRsta < mult[dSta * nChs]; multRsta++)
                         {
@@ -294,8 +264,8 @@ void R3BSofSciTcal2SingleTcal::Exec(Option_t* option)
                             {
                                 // RawPos = TrawRIGHT - TrawLEFT corresponds to x increasing from RIGHT to LEFT
                                 iRawPos = (iTraw[dSta * nChs][multRsta] - iTraw[dSta * nChs + 1][multLsta]);
-                                if ((iRawPos < fRawPosPar->GetSignalTcalParams(2 * dSta)) ||
-                                    (iRawPos > fRawPosPar->GetSignalTcalParams(2 * dSta + 1)))
+                                if ((iRawPos < fRawPosPar->GetParam(2 * dSta)) ||
+                                    (iRawPos > fRawPosPar->GetParam(2 * dSta + 1)))
                                     continue;
                                 iRawTime_dSta = 0.5 * (iTraw[dSta * nChs][multRsta] + iTraw[dSta * nChs + 1][multLsta]);
                                 iRawTime_dSto = 0.5 * (iTraw[dSto * nChs][multRsto] + iTraw[dSto * nChs + 1][multLsto]);
@@ -357,16 +327,21 @@ void R3BSofSciTcal2SingleTcal::Exec(Option_t* option)
 
     } // end of if nHitsPerEvent_SofSci>0 + data on LEFT and data RIGHT on SofSci at CAVE C
 
+    // if(fTcal)
+    // delete fTcal;
+
     ++fNevent;
 }
 
-void R3BSofSciTcal2SingleTcal::FinishEvent()
-{
-    fSingleTcal->Clear();
-    fNumSingleTcal = 0;
-}
+void R3BSofSciTcal2SingleTcal::Finish() {}
 
-void R3BSofSciTcal2SingleTcal::FinishTask() {}
+void R3BSofSciTcal2SingleTcal::Reset()
+{
+    if (fSingleTcal)
+    {
+        fSingleTcal->Clear();
+    }
+}
 
 // -----   Private method AddSingleTcalData  --------------------------------------------
 R3BSofSciSingleTcalData* R3BSofSciTcal2SingleTcal::AddSingleTcalData(UShort_t iDet,
